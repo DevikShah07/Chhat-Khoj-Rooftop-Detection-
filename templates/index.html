@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chhat Khoj - Rooftop Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --fb-blue: #1877f2;
+            --fb-blue-dark: #166fe5;
+            --fb-blue-light: #e7f3ff;
+            --fb-grey: #f0f2f5;
+            --fb-green: #42b72a;
+            --fb-red: #fa3e3e;
+            --fb-yellow: #ffa516;
+            --white: #ffffff;
+            --dark-text: #1c1e21;
+            --light-text: #65676b;
+        }
+        
+        body {
+            background-color: var(--fb-grey);
+            padding: 0;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--dark-text);
+        }
+        
+        .header {
+            background-color: var(--white);
+            color: var(--fb-blue);
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: -1px;
+            color: var(--fb-blue);
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            color: var(--light-text);
+        }
+        
+        .main-container {
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: var(--white);
+            border-bottom: 1px solid #e4e6eb;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #dddfe2;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--fb-blue-light);
+        }
+        
+        .drop-zone:hover {
+            border-color: var(--fb-blue);
+            background-color: rgba(24, 119, 242, 0.05);
+        }
+        
+        .btn-fb {
+            background-color: var(--fb-blue);
+            color: var(--white);
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-fb:hover {
+            background-color: var(--fb-blue-dark);
+            color: var(--white);
+        }
+        
+        .btn-fb-green {
+            background-color: var(--fb-green);
+            color: var(--white);
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-fb-green:hover {
+            background-color: #36a420;
+            color: var(--white);
+        }
+        
+        .result-image-container {
+            position: relative;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .result-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .result-image:hover {
+            transform: scale(1.01);
+        }
+        
+        .image-label {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .download-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--fb-blue);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: var(--fb-blue-dark);
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loader {
+            width: 60px;
+            aspect-ratio: 1;
+            color: var(--fb-blue);
+            background:
+                linear-gradient(currentColor 0 0) 100%  0,
+                linear-gradient(currentColor 0 0) 0  100%;
+            background-size: 50.1% 50.1%;
+            background-repeat: no-repeat;
+            animation: l7-0 1s infinite steps(1);
+            margin: 0 auto;
+        }
+        
+        .loader::before,
+        .loader::after {
+            content: "";
+            position: absolute;
+            inset: 0 50% 50% 0;
+            background: currentColor;
+            transform: scale(var(--s,1)) perspective(150px) rotateY(0deg);
+            transform-origin: bottom right;
+            animation: l7-1 .5s infinite linear alternate;
+        }
+        
+        .loader::after {
+            --s:-1,-1;
+        }
+        
+        @keyframes l7-0 {
+            0%  {transform: scaleX(1)  rotate(0deg)}
+            50% {transform: scaleX(-1) rotate(-90deg)}
+        }
+        
+        @keyframes l7-1 {
+            49.99% {transform:scale(var(--s,1)) perspective(150px) rotateX(-90deg) ;filter:grayscale(0)}
+            50%    {transform:scale(var(--s,1)) perspective(150px) rotateX(-90deg) ;filter:grayscale(0.8)}
+            100%   {transform:scale(var(--s,1)) perspective(150px) rotateX(-180deg);filter:grayscale(0.8)}
+        }
+        
+        .error-message {
+            color: var(--fb-red);
+            margin: 15px 0;
+            display: none;
+            padding: 10px 15px;
+            background-color: #ffebe9;
+            border-left: 4px solid var(--fb-red);
+            border-radius: 8px;
+        }
+        
+        .section-title {
+            color: var(--dark-text);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .model-title {
+            background-color: var(--fb-blue-light);
+            color: var(--fb-blue);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .footer {
+            background-color: var(--white);
+            padding: 20px 0;
+            border-top: 1px solid #dddfe2;
+            color: var(--light-text);
+        }
+        
+        /* About section and how it works styles */
+        .about-section, .how-it-works-section {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            background: linear-gradient(145deg, var(--fb-blue-light), var(--white));
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--fb-blue);
+            object-fit: cover;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(24, 119, 242, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(24, 119, 242, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(24, 119, 242, 0);
+            }
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .social-links a {
+            color: var(--fb-blue);
+            font-size: 1.5rem;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: scale(1.2);
+            color: var(--fb-blue-dark);
+        }
+        
+        .process-card {
+            border-radius: 12px;
+            background-color: var(--white);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .process-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .process-header {
+            background: linear-gradient(145deg, var(--fb-blue-dark), var(--fb-blue));
+            color: var(--white);
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .process-body {
+            padding: 20px;
+        }
+        
+        .process-step {
+            display: flex;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--fb-grey);
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--fb-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--fb-blue);
+        }
+        
+        .animated-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--fb-blue-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: var(--fb-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .animated-icon:hover {
+            background-color: var(--fb-blue);
+            color: var(--white);
+            transform: rotate(360deg);
+        }
+        
+        .nav-tabs {
+            border-bottom: 1px solid var(--fb-blue-light);
+            margin-bottom: 20px;
+        }
+        
+        .nav-link {
+            color: var(--fb-blue);
+            border: 1px solid transparent;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 10px 20px;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--fb-blue);
+            border-color: var(--fb-blue);
+        }
+        
+        .tab-pane {
+            padding: 20px;
+            border: 1px solid var(--fb-blue-light);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tech-badge {
+            background-color: var(--fb-blue-light);
+            color: var(--fb-blue);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="logo m-0">छत खोज</h1>
+            <p class="tagline m-0">Advanced Rooftop Detection System</p>
+        </div>
+    </div>
+
+    <div class="main-container container">
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">
+                            <i class="fas fa-home me-2"></i>Home
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="how-tab" data-bs-toggle="tab" data-bs-target="#how" type="button" role="tab" aria-controls="how" aria-selected="false">
+                            <i class="fas fa-cogs me-2"></i>How It Works
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false">
+                            <i class="fas fa-user me-2"></i>About Developer
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <!-- Upload card -->
+                        <div class="card border-0 shadow-none">
+                            <div class="card-header">
+                                <i class="fas fa-cloud-upload-alt me-2"></i> Upload Image
+                            </div>
+                            <div class="card-body">
+                                <div class="drop-zone" id="dropZone">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-primary"></i>
+                                    <h4>Drag & Drop Image Here</h4>
+                                    <p class="text-muted">or</p>
+                                    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" style="display: none;">
+                                    <button class="btn btn-fb" onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-image me-2"></i>Choose Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="how" role="tabpanel" aria-labelledby="how-tab">
+                        <div class="how-it-works-section">
+                            <div class="row mb-4">
+                                <div class="col-md-12 text-center">
+                                    <h3 class="mb-4">How Chhat Khoj Works</h3>
+                                    <p class="lead">A cutting-edge rooftop detection system using deep learning</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="process-card">
+                                        <div class="process-header">
+                                            <h4 class="m-0"><i class="fas fa-cogs me-2"></i>Technical Process</h4>
+                                        </div>
+                                        <div class="process-body">
+                                            <div class="process-step">
+                                                <div class="step-number">1</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">Image Upload & Processing</h5>
+                                                    <p>Upload a satellite or aerial image. The system divides large images into 1024x1024 pixel chunks for efficient processing.</p>
+                                                </div>
+                                            </div>
+                                            <div class="process-step">
+                                                <div class="step-number">2</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">Dual Model Analysis</h5>
+                                                    <p>Two specialized YOLO segmentation models process the image chunks, each trained to identify different rooftop characteristics.</p>
+                                                </div>
+                                            </div>
+                                            <div class="process-step">
+                                                <div class="step-number">3</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">Result Merging</h5>
+                                                    <p>Chunk predictions are merged to reconstruct the original image size, with careful handling of overlapping areas.</p>
+                                                </div>
+                                            </div>
+                                            <div class="process-step">
+                                                <div class="step-number">4</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">Overlay Creation</h5>
+                                                    <p>System generates binary masks highlighting detected rooftops and creates colored overlays on the original image for better visualization.</p>
+                                                </div>
+                                            </div>
+                                            <div class="process-step" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                                                <div class="step-number">5</div>
+                                                <div class="step-content">
+                                                    <h5 class="step-title">Result Visualization</h5>
+                                                    <p>The final output provides masks showing detected areas and overlay images that highlight rooftops on the original image.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <div class="animated-icon mb-3">
+                                                <i class="fas fa-brain"></i>
+                                            </div>
+                                            <h5>AI Technology</h5>
+                                            <p>Powered by YOLO segmentation models trained on extensive satellite imagery datasets.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <div class="animated-icon mb-3">
+                                                <i class="fas fa-th-large"></i>
+                                            </div>
+                                            <h5>Chunking Mechanism</h5>
+                                            <p>Handles large satellite images by breaking them into processable chunks.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <div class="animated-icon mb-3">
+                                                <i class="fas fa-layer-group"></i>
+                                            </div>
+                                            <h5>Dual Model Approach</h5>
+                                            <p>Uses complementary models for more accurate rooftop detection across diverse structures.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+                        <div class="about-section">
+                            <div class="row mb-4">
+                                <div class="col-md-12 text-center">
+                                    <h3 class="mb-4">About the Developer</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-8 mx-auto">
+                                    <div class="profile-card">
+                                        <img src="https://avatars.githubusercontent.com/u/DevikShah07" alt="Devik Shah" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=Devik+Shah&background=1877f2&color=fff&size=150'">
+                                        <h4 class="mt-3">Devik Shah</h4>
+                                        <p class="text-muted mb-0">AI/ML Engineer</p>
+                                        <div class="social-links mt-3">
+                                            <a href="https://github.com/DevikShah07" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                                            <a href="https://www.linkedin.com/in/devik-shah" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <p>"I'm Devik Shah, an aspiring AI/ML Engineer with a strong passion for solving real-world problems through deep learning and computer vision. This rooftop detection project showcases my work on geospatial analysis using a U-Net model with a ResNet34 backbone, aimed at accurately identifying rooftops from satellite imagery. I thrive on building practical AI solutions that contribute to smarter urban planning and infrastructure development."</p>
+                                        </div>
+                                        
+                                        <div class="tech-stack">
+                                            <span class="tech-badge">Python</span>
+                                            <span class="tech-badge">TensorFlow</span>
+                                            <span class="tech-badge">PyTorch</span>
+                                            <span class="tech-badge">Computer Vision</span>
+                                            <span class="tech-badge">Deep Learning</span>
+                                            <span class="tech-badge">Flask</span>
+                                            <span class="tech-badge">OpenCV</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loader"></div>
+            <p class="mt-3">Processing image... This may take a few minutes for large images.</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="card" id="resultContainer" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-chart-bar me-2"></i> Detection Results
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="model-title">
+                            <i class="fas fa-layer-group me-2"></i>Model 1 Results
+                        </div>
+                        <div class="result-image-container">
+                            <img id="mask1" class="result-image" src="" alt="Mask 1">
+                            <span class="image-label">Mask 1</span>
+                            <button class="download-btn" onclick="downloadImage('mask1')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                        <div class="result-image-container">
+                            <img id="overlay1" class="result-image" src="" alt="Overlay 1">
+                            <span class="image-label">Overlay 1</span>
+                            <button class="download-btn" onclick="downloadImage('overlay1')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="model-title">
+                            <i class="fas fa-layer-group me-2"></i>Model 2 Results
+                        </div>
+                        <div class="result-image-container">
+                            <img id="mask2" class="result-image" src="" alt="Mask 2">
+                            <span class="image-label">Mask 2</span>
+                            <button class="download-btn" onclick="downloadImage('mask2')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                        <div class="result-image-container">
+                            <img id="overlay2" class="result-image" src="" alt="Overlay 2">
+                            <span class="image-label">Overlay 2</span>
+                            <button class="download-btn" onclick="downloadImage('overlay2')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-fb-green" onclick="downloadAllImages()">
+                        <i class="fas fa-download me-2"></i>Download All Images
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer mt-5">
+        <div class="container text-center">
+            <p class="m-0">© 2023 छत खोज (Chhat Khoj) | Rooftop Detection System</p>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        let currentImages = {};
+
+        // Handle drag and drop
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#1877f2';
+            dropZone.style.backgroundColor = 'rgba(24, 119, 242, 0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#dddfe2';
+            dropZone.style.backgroundColor = '#e7f3ff';
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#dddfe2';
+            dropZone.style.backgroundColor = '#e7f3ff';
+            
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length) {
+                fileInput.files = files;
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                showError('Please upload an image file (jpg, jpeg, or png)');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Server error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Add timestamp to prevent caching
+                    const timestamp = new Date().getTime();
+                    const mask1 = document.getElementById('mask1');
+                    const mask2 = document.getElementById('mask2');
+                    const overlay1 = document.getElementById('overlay1');
+                    const overlay2 = document.getElementById('overlay2');
+                    
+                    // Clear any previous error messages
+                    errorMessage.style.display = 'none';
+                    errorMessage.textContent = '';
+                    
+                    // Store current results for download
+                    currentImages = {
+                        mask1: `/static/results/${data.results.mask1}`,
+                        mask2: `/static/results/${data.results.mask2}`,
+                        overlay1: `/static/results/${data.results.overlay1}`,
+                        overlay2: `/static/results/${data.results.overlay2}`
+                    };
+                    
+                    // Set image sources with error handling
+                    mask1.onerror = () => {
+                        console.error('Error loading mask1');
+                        mask1.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                        showError('Error loading mask 1');
+                    };
+                    mask2.onerror = () => {
+                        console.error('Error loading mask2');
+                        mask2.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                        showError('Error loading mask 2');
+                    };
+                    overlay1.onerror = () => {
+                        console.error('Error loading overlay1');
+                        overlay1.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                        showError('Error loading overlay 1');
+                    };
+                    overlay2.onerror = () => {
+                        console.error('Error loading overlay2');
+                        overlay2.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                        showError('Error loading overlay 2');
+                    };
+                    
+                    // Load images with retry mechanism
+                    const loadImage = (img, src) => {
+                        return new Promise((resolve, reject) => {
+                            img.onload = resolve;
+                            img.onerror = reject;
+                            img.src = src;
+                        });
+                    };
+                    
+                    Promise.all([
+                        loadImage(mask1, `${currentImages.mask1}?t=${timestamp}`),
+                        loadImage(mask2, `${currentImages.mask2}?t=${timestamp}`),
+                        loadImage(overlay1, `${currentImages.overlay1}?t=${timestamp}`),
+                        loadImage(overlay2, `${currentImages.overlay2}?t=${timestamp}`)
+                    ]).then(() => {
+                        resultContainer.style.display = 'block';
+                        // Scroll to results
+                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    }).catch(error => {
+                        console.error('Error loading images:', error);
+                        showError('Error loading some images. Please try again.');
+                    });
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(`Error processing image: ${error.message}`);
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+            });
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function downloadImage(imageId) {
+            if (!currentImages[imageId]) {
+                showError('Image not available for download');
+                return;
+            }
+            
+            const a = document.createElement('a');
+            a.href = currentImages[imageId];
+            a.download = imageId + '.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        
+        function downloadAllImages() {
+            // Download all images
+            if (Object.keys(currentImages).length === 0) {
+                showError('No images available for download');
+                return;
+            }
+            
+            // Download each image sequentially
+            for (const [imageId, url] of Object.entries(currentImages)) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = imageId + '.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
